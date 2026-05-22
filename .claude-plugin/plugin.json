@@ -1,0 +1,19 @@
+{
+  "name": "openaca",
+  "version": "0.1.0",
+  "description": "Claude Code workflows for scanning agent supply-chain components with OpenACA.",
+  "author": {
+    "name": "OpenACA",
+    "url": "https://github.com/open-agent-security"
+  },
+  "homepage": "https://github.com/open-agent-security/openaca-claude-plugin",
+  "repository": "https://github.com/open-agent-security/openaca-claude-plugin",
+  "license": "Apache-2.0",
+  "keywords": [
+    "agent-security",
+    "supply-chain",
+    "mcp",
+    "claude-code",
+    "openaca"
+  ]
+}
