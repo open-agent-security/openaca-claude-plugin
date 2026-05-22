@@ -1,0 +1,181 @@
+name: Autofix
+
+# Two-direction comment-bounce that closes the Codex/Claude review loop:
+#   1. Codex review submitted -> post `@claude please address...` -> claude.yml fires.
+#   2. claude.yml posts "Claude finished" -> post `@codex review` -> Codex re-reviews HEAD.
+#   0. main moved -> rebase clean BEHIND PRs or ping @claude on DIRTY ones.
+#
+# Authentication: AUTOFIX_TRIGGER_PAT (fine-grained, repo OWNER/MEMBER,
+# Pull-requests + Contents read/write). GitHub suppresses workflow runs
+# triggered by GITHUB_TOKEN events (recursion guard), so the PAT is
+# required to make the bounces re-trigger downstream workflows.
+#
+# Workflow-injection safety: every user/bot-controlled input is read via
+# env: and referenced as a shell variable; comment bodies posted to PRs
+# are hardcoded literals.
+
+on:
+  pull_request_review:
+    types: [submitted]
+  issue_comment:
+    types: [created, edited]
+  push:
+    branches: [main]
+
+jobs:
+  trigger-claude-via-comment:
+    if: github.event_name == 'pull_request_review' && github.event.review.user.login == 'chatgpt-codex-connector[bot]' && github.event.review.state == 'commented'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.AUTOFIX_TRIGGER_PAT }}
+      REPO: ${{ github.repository }}
+      PR_NUM: ${{ github.event.pull_request.number }}
+      REVIEW_ID: ${{ github.event.review.id }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Cap auto-address iterations (max 7)
+        run: |
+          MAX=7
+          CLAUDE_RUNS=$(gh pr view "$PR_NUM" -R "$REPO" --json comments \
+            --jq '[.comments[] | select(.author.login == "claude")] | length')
+          if [ "$CLAUDE_RUNS" -ge "$MAX" ]; then
+            gh pr comment "$PR_NUM" -R "$REPO" --body "🛑 Auto-address loop limit hit — claude has already run $CLAUDE_RUNS times on this PR (max $MAX). Codex review id $REVIEW_ID was NOT auto-addressed. Manual review needed. ([workflow run]($RUN_URL))"
+            echo "::error::Auto-address loop limit hit ($CLAUDE_RUNS/$MAX) — see PR comment."
+            exit 1
+          fi
+          echo "Auto-address iteration $((CLAUDE_RUNS + 1)) of $MAX"
+
+      - name: Post @claude trigger comment
+        run: |
+          gh pr comment "$PR_NUM" -R "$REPO" --body "@claude please address the Codex review feedback above. CRITICAL: before applying any fix that depends on infrastructure or invariants you have not verified, grep the repo for the prerequisite. If it is not present, push back via a PR comment explaining the missing context rather than implementing on a false premise."
+
+  trigger-codex-rereview-via-comment:
+    if: |
+      github.event_name == 'issue_comment'
+      && github.event.issue.pull_request != null
+      && github.event.comment.user.login == 'claude[bot]'
+      && contains(github.event.comment.body, 'Claude finished')
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.AUTOFIX_TRIGGER_PAT }}
+      REPO: ${{ github.repository }}
+      PR_NUM: ${{ github.event.issue.number }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Post @codex re-review trigger (idempotent per SHA)
+        run: |
+          HEAD_SHA=$(gh pr view "$PR_NUM" -R "$REPO" --json headRefOid --jq '.headRefOid')
+          MARKER="<!-- autofix-rereview-sha:$HEAD_SHA -->"
+          ALREADY=$(gh pr view "$PR_NUM" -R "$REPO" --json comments \
+            --jq "[.comments[] | select(.body | contains(\"$MARKER\"))] | length")
+          if [ "$ALREADY" -gt 0 ]; then
+            echo "Already requested @codex review for $HEAD_SHA — skipping."
+            exit 0
+          fi
+          gh pr comment "$PR_NUM" -R "$REPO" --body "$MARKER
+          @codex review the latest commits — claude bot just pushed fixes that haven't been reviewed yet."
+
+  rebase-stale-prs:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: rebase-stale-prs
+      cancel-in-progress: true
+    env:
+      GH_TOKEN: ${{ secrets.AUTOFIX_TRIGGER_PAT }}
+      REPO: ${{ github.repository }}
+      MAIN_SHA: ${{ github.sha }}
+    steps:
+      - id: have_pat
+        name: Check AUTOFIX_TRIGGER_PAT presence
+        env:
+          PAT: ${{ secrets.AUTOFIX_TRIGGER_PAT }}
+        run: |
+          if [ -z "$PAT" ]; then
+            echo "::warning::AUTOFIX_TRIGGER_PAT not set; skipping rebase. Add the secret per setup-autofix instructions to enable."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout (full history for rebase)
+        if: steps.have_pat.outputs.skip != 'true'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.AUTOFIX_TRIGGER_PAT }}
+
+      - name: Configure git author
+        if: steps.have_pat.outputs.skip != 'true'
+        run: |
+          git config user.email "actions@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
+      - name: Rebase BEHIND PRs / flag DIRTY ones
+        if: steps.have_pat.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+
+          PRS_JSON=$(gh pr list --state open -R "$REPO" \
+            --json number,headRefName,mergeStateStatus,baseRefName,headRepository \
+            --jq "[.[] | select(.baseRefName == \"main\") | select(.headRepository.nameWithOwner == \"$REPO\")]")
+
+          echo "Open same-repo PRs targeting main:"
+          echo "$PRS_JSON" | jq -r '.[] | "  #\(.number) [\(.mergeStateStatus)] \(.headRefName)"'
+
+          COUNT=$(echo "$PRS_JSON" | jq 'length')
+          for i in $(seq 0 $((COUNT - 1))); do
+            PR_NUM=$(echo "$PRS_JSON" | jq -r ".[$i].number")
+            BRANCH=$(echo "$PRS_JSON" | jq -r ".[$i].headRefName")
+            STATUS=$(echo "$PRS_JSON" | jq -r ".[$i].mergeStateStatus")
+
+            if ! printf '%s' "$BRANCH" | grep -qE '^[A-Za-z0-9._/-]+$'; then
+              echo "::warning::PR #$PR_NUM has unsafe branch name; skipping"
+              continue
+            fi
+
+            case "$STATUS" in
+              BEHIND)
+                echo "PR #$PR_NUM ($BRANCH): clean rebase needed"
+                git fetch origin "$BRANCH":"refs/remotes/origin/$BRANCH" --force
+                git checkout -B "$BRANCH" "origin/$BRANCH"
+                if git rebase origin/main; then
+                  if git push --force-with-lease origin "$BRANCH"; then
+                    gh pr comment "$PR_NUM" -R "$REPO" \
+                      --body "🔁 Auto-rebased on \`main\` (no conflicts) after $MAIN_SHA."
+                  else
+                    echo "::warning::Force-push of #$PR_NUM failed (lease lost?). Will retry on next push."
+                  fi
+                else
+                  git rebase --abort
+                  echo "::warning::Rebase of #$PR_NUM failed despite BEHIND status (likely race with another push)"
+                fi
+                git checkout main
+                ;;
+              DIRTY)
+                echo "PR #$PR_NUM ($BRANCH): conflicts — asking @claude to rebase"
+                MARKER="<!-- autofix-rebase-claude:$MAIN_SHA -->"
+                ALREADY=$(gh pr view "$PR_NUM" -R "$REPO" --json comments \
+                  --jq "[.comments[] | select(.body | contains(\"$MARKER\"))] | length")
+                if [ "$ALREADY" -gt 0 ]; then
+                  echo "  already asked @claude for $MAIN_SHA — skipping"
+                  continue
+                fi
+                gh pr comment "$PR_NUM" -R "$REPO" --body "$MARKER
+                @claude main has moved and this PR has merge conflicts. Please rebase \`$BRANCH\` on \`origin/main\` and resolve any conflicts. Run the local pre-push gate before force-pushing."
+                ;;
+              CLEAN)
+                echo "PR #$PR_NUM ($BRANCH): already current — skipping"
+                ;;
+              *)
+                echo "PR #$PR_NUM ($BRANCH): status $STATUS — leaving alone"
+                ;;
+            esac
+          done

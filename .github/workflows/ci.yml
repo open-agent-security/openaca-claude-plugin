@@ -1,0 +1,38 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: validate plugin scaffold
+        run: python3 scripts/validate_plugin.py
+
+      - name: JSON syntax (.claude-plugin/ and skills/)
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, sys
+          bad = []
+          roots = [pathlib.Path('.claude-plugin'), pathlib.Path('skills')]
+          for root in roots:
+              if not root.exists():
+                  continue
+              for p in root.rglob('*.json'):
+                  try:
+                      json.loads(p.read_text())
+                  except Exception as e:
+                      bad.append(f'{p}: {e}')
+          if bad:
+              print('\n'.join(bad))
+              sys.exit(1)
+          PY
