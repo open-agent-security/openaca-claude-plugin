@@ -25,13 +25,13 @@ uvx openaca scan endpoint -v
   agent configuration, pass `--project`:
 
 ```bash
-uvx openaca scan endpoint -v --project .
+uvx openaca scan endpoint --project /path/to/project -v
 ```
 
-- For a repository-only scan, run:
+- For a repository-only scan, run repo scan with the repo path as target:
 
 ```bash
-uvx openaca scan repo --target .
+uvx openaca scan repo --target /path/to/repo -v
 ```
 
 If `uvx` is unavailable but `openaca` is installed, use the same command
