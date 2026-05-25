@@ -9,7 +9,8 @@
       "name": "openaca",
       "source": {
         "source": "github",
-        "repo": "open-agent-security/openaca-claude-plugin"
+        "repo": "open-agent-security/openaca-claude-plugin",
+        "sha": "4cf8aaf2c6dc154dcabfca3257184327135435fa"
       }
     }
   ]

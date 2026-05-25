@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -34,6 +35,9 @@ def main() -> int:
     if manifest.get("name") != "openaca":
         fail(".claude-plugin/plugin.json name must be openaca")
 
+    if "version" in manifest:
+        fail(".claude-plugin/plugin.json must omit version so git SHA drives updates")
+
     if marketplace.get("name") != "openaca":
         fail(".claude-plugin/marketplace.json name must be openaca")
 
@@ -60,6 +64,18 @@ def main() -> int:
     plugins = marketplace.get("plugins", [])
     if len(plugins) != 1 or plugins[0].get("name") != "openaca":
         fail("marketplace must list exactly one openaca plugin")
+    if "version" in plugins[0]:
+        fail("marketplace plugin entry must omit version so git SHA drives updates")
+    source = plugins[0].get("source")
+    if not isinstance(source, dict):
+        fail("marketplace plugin source must be a GitHub source object")
+    if source.get("source") != "github":
+        fail("marketplace plugin source.source must be github")
+    if source.get("repo") != "open-agent-security/openaca-claude-plugin":
+        fail("marketplace plugin source.repo must be open-agent-security/openaca-claude-plugin")
+    sha = source.get("sha")
+    if not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{40}", sha):
+        fail("marketplace plugin source.sha must be a full 40-character lowercase git SHA")
 
     print("plugin scaffold ok")
     return 0

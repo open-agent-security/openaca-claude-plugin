@@ -1,0 +1,129 @@
+name: Bump marketplace plugin SHA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".claude-plugin/plugin.json"
+      - "skills/**"
+      - "README.md"
+      - "LICENSE"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    env:
+      MARKETPLACE_PATH: .claude-plugin/marketplace.json
+      PLUGIN_NAME: openaca
+      BUMP_BRANCH: bot/bump-openaca-plugin-sha
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compare pinned SHA to plugin payload SHA
+        id: compare
+        run: |
+          set -euo pipefail
+
+          payload_sha=$(git log -1 --no-merges --format=%H HEAD -- \
+            .claude-plugin/plugin.json \
+            skills \
+            README.md \
+            LICENSE)
+
+          pinned_sha=$(python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          marketplace = json.loads(Path(os.environ["MARKETPLACE_PATH"]).read_text())
+          plugin_name = os.environ["PLUGIN_NAME"]
+          for plugin in marketplace["plugins"]:
+              if plugin.get("name") == plugin_name:
+                  source = plugin.get("source")
+                  if not isinstance(source, dict):
+                      raise SystemExit(f"{plugin_name}: source must be an object")
+                  print(source.get("sha", ""))
+                  break
+          else:
+              raise SystemExit(f"{plugin_name}: plugin entry not found")
+          PY
+          )
+
+          echo "payload_sha=$payload_sha" >> "$GITHUB_OUTPUT"
+          echo "pinned_sha=$pinned_sha" >> "$GITHUB_OUTPUT"
+          if [ "$payload_sha" = "$pinned_sha" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update marketplace SHA
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ["MARKETPLACE_PATH"])
+          plugin_name = os.environ["PLUGIN_NAME"]
+          payload_sha = "${{ steps.compare.outputs.payload_sha }}"
+
+          marketplace = json.loads(path.read_text())
+          for plugin in marketplace["plugins"]:
+              if plugin.get("name") == plugin_name:
+                  source = plugin.get("source")
+                  if not isinstance(source, dict):
+                      raise SystemExit(f"{plugin_name}: source must be an object")
+                  source["sha"] = payload_sha
+                  break
+          else:
+              raise SystemExit(f"{plugin_name}: plugin entry not found")
+
+          path.write_text(json.dumps(marketplace, indent=2) + "\n")
+          PY
+
+      - name: Open bump PR
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+
+          git config user.email "actions@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git checkout -B "$BUMP_BRANCH"
+          git add "$MARKETPLACE_PATH"
+          git commit -m "Bump openaca plugin source SHA"
+          git push --force-with-lease origin "$BUMP_BRANCH"
+
+          body="Updates \`$PLUGIN_NAME\` marketplace source SHA from \`${{ steps.compare.outputs.pinned_sha }}\` to \`${{ steps.compare.outputs.payload_sha }}\`.
+
+          This PR is generated after plugin payload files change. It is intentionally not auto-merged."
+
+          pr_number=$(gh pr list \
+            --head "$BUMP_BRANCH" \
+            --base main \
+            --state open \
+            --json number \
+            --jq '.[0].number // ""')
+
+          if [ -n "$pr_number" ]; then
+            gh pr edit "$pr_number" \
+              --title "Bump openaca plugin source SHA" \
+              --body "$body"
+          else
+            gh pr create \
+              --base main \
+              --head "$BUMP_BRANCH" \
+              --title "Bump openaca plugin source SHA" \
+              --body "$body"
+          fi
