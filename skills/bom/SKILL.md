@@ -43,11 +43,18 @@ they are related, and where they were observed. Keep findings separate:
 scan results and advisories reference BOM components, but the BOM itself
 is inventory.
 
-When useful, suggest scanning the stored BOM with the current corpus:
+When useful, suggest scanning the stored BOM with the current corpus
+for **advisory** matches:
 
 ```bash
 uvx openaca@latest scan bom -v --input openaca-agent-bom.json
 ```
+
+`scan bom` cannot surface posture findings — configuration-hygiene
+rules (mutable install refs, MCP auto-approval, missing remote auth,
+insecure transport) require live endpoint/project configuration that
+isn't serialized into the CycloneDX BOM. For posture, run a fresh
+endpoint or repo scan with `--include-posture` instead.
 
 ## Safety
 
