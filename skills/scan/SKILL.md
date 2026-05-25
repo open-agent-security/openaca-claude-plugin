@@ -15,23 +15,29 @@ installed plugins or skills, or review agent supply-chain exposure.
 
 ## Choose The Scan Target
 
+`--include-posture` is included by default in the commands below so
+scanner-side hygiene findings (mutable install refs, insecure
+transport, missing remote auth) surface alongside advisory matches.
+Posture findings never affect `--fail-on` exit codes. Drop the flag
+for an advisory-only scan.
+
 - For the user's active Claude Code setup, run an endpoint scan:
 
 ```bash
-uvx openaca scan endpoint -v
+uvx openaca@latest scan endpoint -v --include-posture
 ```
 
 - If the user names a project path or asks to include project-local
   agent configuration, pass `--project`:
 
 ```bash
-uvx openaca scan endpoint --project /path/to/project -v
+uvx openaca@latest scan endpoint --project /path/to/project -v --include-posture
 ```
 
 - For a repository-only scan, run repo scan with the repo path as target:
 
 ```bash
-uvx openaca scan repo --target /path/to/repo -v
+uvx openaca@latest scan repo --target /path/to/repo -v --include-posture
 ```
 
 If `uvx` is unavailable but `openaca` is installed, use the same command

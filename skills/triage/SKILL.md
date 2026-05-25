@@ -17,16 +17,18 @@ configuration and wants a security-oriented review.
 
 1. Identify the changed scope: endpoint config, project config, repo
    files, or a stored Agent BOM.
-2. Run the narrowest useful scan:
+2. Run the narrowest useful scan. Include posture findings — triage
+   is exactly where configuration-hygiene issues (mutable install
+   refs, insecure transport, missing remote auth) are most useful:
 
 ```bash
-uvx openaca scan endpoint -v --project .
+uvx openaca@latest scan endpoint -v --project . --include-posture
 ```
 
 3. If the user only wants inventory, generate a BOM instead:
 
 ```bash
-uvx openaca bom endpoint --project . --output openaca-agent-bom.json
+uvx openaca@latest bom endpoint --project . --output openaca-agent-bom.json
 ```
 
 4. Summarize new or relevant components:
