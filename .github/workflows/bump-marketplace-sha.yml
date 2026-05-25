@@ -103,6 +103,7 @@ jobs:
           git checkout -B "$BUMP_BRANCH"
           git add "$MARKETPLACE_PATH"
           git commit -m "Bump openaca plugin source SHA"
+          git fetch origin "$BUMP_BRANCH" || true
           git push --force-with-lease origin "$BUMP_BRANCH"
 
           body="Updates \`$PLUGIN_NAME\` marketplace source SHA from \`${{ steps.compare.outputs.pinned_sha }}\` to \`${{ steps.compare.outputs.payload_sha }}\`.
