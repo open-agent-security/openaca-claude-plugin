@@ -21,11 +21,22 @@ jobs:
       MARKETPLACE_PATH: .claude-plugin/marketplace.json
       PLUGIN_NAME: openaca
       BUMP_BRANCH: bot/bump-openaca-plugin-sha
-      GH_TOKEN: ${{ github.token }}
+      GH_TOKEN: ${{ secrets.AUTOFIX_TRIGGER_PAT }}
     steps:
+      - id: have_pat
+        name: Check AUTOFIX_TRIGGER_PAT presence
+        env:
+          PAT: ${{ secrets.AUTOFIX_TRIGGER_PAT }}
+        run: |
+          if [ -z "$PAT" ]; then
+            echo "::error::AUTOFIX_TRIGGER_PAT is required to create marketplace bump PRs."
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.AUTOFIX_TRIGGER_PAT }}
 
       - name: Compare pinned SHA to plugin payload SHA
         id: compare
