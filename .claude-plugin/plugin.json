@@ -1,6 +1,5 @@
 {
   "name": "openaca",
-  "version": "0.1.0",
   "description": "Claude Code workflows for scanning agent supply-chain components with OpenACA.",
   "author": {
     "name": "OpenACA",

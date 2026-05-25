@@ -69,3 +69,8 @@ If Claude Code is installed, also run:
 ```bash
 claude plugin validate .
 ```
+
+The marketplace pins the plugin source by git SHA. The plugin manifest
+intentionally omits `version` so Claude Code uses the source SHA for
+update detection. When plugin payload files change on `main`, the
+`bump-marketplace-sha` workflow opens a PR to update the pinned SHA.
