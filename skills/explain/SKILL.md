@@ -35,6 +35,12 @@ If the user provides a BOM and wants current advisory matching:
 uvx openaca@latest scan bom --input openaca-agent-bom.json -v
 ```
 
+`scan bom` returns advisory matches only. Posture findings need live
+configuration (autoapprove lists, remote-auth, endpoint overrides)
+that isn't preserved in the BOM — if the user asks about hygiene
+findings on a BOM, point them at `scan endpoint --include-posture`
+or `scan repo --include-posture` instead.
+
 If the user wants a fresh endpoint scan (include posture so the
 explanation can cover hygiene findings, not just advisory matches):
 

@@ -3,3 +3,7 @@
 
 # Local git worktrees
 .worktrees/
+
+# Generated BOM artifacts (per-machine, not source)
+openaca-agent-bom.json
+*.bom.json
