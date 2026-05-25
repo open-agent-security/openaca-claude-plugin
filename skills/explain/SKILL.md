@@ -32,13 +32,14 @@ match supports that conclusion.
 If the user provides a BOM and wants current advisory matching:
 
 ```bash
-uvx openaca scan bom --input openaca-agent-bom.json -v
+uvx openaca@latest scan bom --input openaca-agent-bom.json -v
 ```
 
-If the user wants a fresh endpoint scan:
+If the user wants a fresh endpoint scan (include posture so the
+explanation can cover hygiene findings, not just advisory matches):
 
 ```bash
-uvx openaca scan endpoint -v --project .
+uvx openaca@latest scan endpoint -v --project . --include-posture
 ```
 
 If `uvx` is unavailable but `openaca` is installed, use the same command
