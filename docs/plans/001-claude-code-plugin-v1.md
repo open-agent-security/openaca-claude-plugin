@@ -6,7 +6,7 @@
 
 **Architecture:** The plugin is a thin wrapper around the published `openaca` CLI. Claude Code skills provide the user-facing workflow; the main OpenACA repository remains the source of truth for scanning, advisory matching, posture rules, and Agent BOM schema. V1 has no hooks, monitors, MCP server, blocking behavior, or background execution.
 
-**Tech Stack:** Claude Code plugin manifest, Claude Code skills, `uvx openaca`, Python 3 standard-library validation.
+**Tech Stack:** Claude Code plugin manifest, Claude Code skills, `uvx --prerelease allow --from openaca openaca`, Python 3 standard-library validation.
 
 ---
 
@@ -45,11 +45,11 @@ Add Apache-2.0 `LICENSE` and ignore `.DS_Store` plus local Claude files.
 
 - [x] **Step 1: Add scan skill**
 
-Create a `scan` skill that runs `uvx openaca scan endpoint -v`, `uvx openaca scan endpoint -v --project .`, or `uvx openaca scan repo --target .` depending on the user's requested scope.
+Create a `scan` skill that runs `uvx --prerelease allow --from openaca openaca scan endpoint -v`, `uvx --prerelease allow --from openaca openaca scan endpoint -v --project .`, or `uvx --prerelease allow --from openaca openaca scan repo --target .` depending on the user's requested scope.
 
 - [x] **Step 2: Add Agent BOM skill**
 
-Create a `bom` skill that runs `uvx openaca bom endpoint --output openaca-agent-bom.json`, `uvx openaca bom endpoint --project . --output openaca-agent-bom.json`, or `uvx openaca bom repo --target . --output openaca-agent-bom.json`.
+Create a `bom` skill that runs `uvx --prerelease allow --from openaca openaca bom endpoint --output openaca-agent-bom.json`, `uvx --prerelease allow --from openaca openaca bom endpoint --project . --output openaca-agent-bom.json`, or `uvx --prerelease allow --from openaca openaca bom repo --target . --output openaca-agent-bom.json`.
 
 - [x] **Step 3: Add explanation skill**
 
