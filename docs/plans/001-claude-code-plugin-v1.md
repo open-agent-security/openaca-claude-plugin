@@ -112,7 +112,7 @@ command output in the PR and rely on `scripts/validate_plugin.py`.
 **Files:**
 - All files above.
 
-- [ ] **Step 1: Commit the initial plugin**
+- [x] **Step 1: Commit the initial plugin**
 
 Run:
 
@@ -121,7 +121,7 @@ git add .
 git commit -m "Add safe OpenACA Claude Code plugin wrapper"
 ```
 
-- [ ] **Step 2: Push main**
+- [x] **Step 2: Push main**
 
 Run:
 
