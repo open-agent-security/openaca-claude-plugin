@@ -18,19 +18,19 @@ composition.
 - For the current Claude Code endpoint:
 
 ```bash
-uvx openaca@latest bom endpoint --output openaca-agent-bom.json
+uvx --prerelease allow --from openaca openaca bom endpoint --output openaca-agent-bom.json
 ```
 
 - To include project-local configuration:
 
 ```bash
-uvx openaca@latest bom endpoint --project /path/to/project --output openaca-agent-bom.json
+uvx --prerelease allow --from openaca openaca bom endpoint --project /path/to/project --output openaca-agent-bom.json
 ```
 
 - For a repository target:
 
 ```bash
-uvx openaca@latest bom repo --target /path/to/repo --output openaca-agent-bom.json
+uvx --prerelease allow --from openaca openaca bom repo --target /path/to/repo --output openaca-agent-bom.json
 ```
 
 If `uvx` is unavailable but `openaca` is installed, use the same command
@@ -47,7 +47,7 @@ When useful, suggest scanning the stored BOM with the current corpus
 for **advisory** matches:
 
 ```bash
-uvx openaca@latest scan bom -v --input openaca-agent-bom.json
+uvx --prerelease allow --from openaca openaca scan bom -v --input openaca-agent-bom.json
 ```
 
 `scan bom` cannot surface posture findings — configuration-hygiene

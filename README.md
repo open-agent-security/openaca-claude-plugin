@@ -32,8 +32,9 @@ The skills are then available as namespaced Claude Code commands:
 - Claude Code with plugin support.
 - `uvx` available on PATH, or the `openaca` CLI already installed.
 
-The plugin examples prefer `uvx openaca` so users can run the current
-published CLI without managing a separate installation.
+The plugin examples use `uvx --prerelease allow --from openaca` so
+beta testers get the latest published OpenACA pre-release without
+managing a separate installation.
 
 ## What The Plugin Provides
 

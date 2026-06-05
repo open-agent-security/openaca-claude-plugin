@@ -24,20 +24,20 @@ for an advisory-only scan.
 - For the user's active Claude Code setup, run an endpoint scan:
 
 ```bash
-uvx openaca@latest scan endpoint -v --include-posture
+uvx --prerelease allow --from openaca openaca scan endpoint -v --include-posture
 ```
 
 - If the user names a project path or asks to include project-local
   agent configuration, pass `--project`:
 
 ```bash
-uvx openaca@latest scan endpoint --project /path/to/project -v --include-posture
+uvx --prerelease allow --from openaca openaca scan endpoint --project /path/to/project -v --include-posture
 ```
 
 - For a repository-only scan, run repo scan with the repo path as target:
 
 ```bash
-uvx openaca@latest scan repo --target /path/to/repo -v --include-posture
+uvx --prerelease allow --from openaca openaca scan repo --target /path/to/repo -v --include-posture
 ```
 
 If `uvx` is unavailable but `openaca` is installed, use the same command
