@@ -32,7 +32,7 @@ match supports that conclusion.
 If the user provides a BOM and wants current advisory matching:
 
 ```bash
-uvx --prerelease allow --isolated --from openaca openaca scan bom --input openaca-agent-bom.json -v
+uvx --isolated --from openaca openaca scan bom --input openaca-agent-bom.json -v
 ```
 
 `scan bom` returns advisory matches only. Posture findings need live
@@ -45,7 +45,7 @@ If the user wants a fresh endpoint scan (include posture so the
 explanation can cover hygiene findings, not just advisory matches):
 
 ```bash
-uvx --prerelease allow --isolated --from openaca openaca scan endpoint -v --project . --include-posture
+uvx --isolated --from openaca openaca scan endpoint -v --project . --include-posture
 ```
 
 If `uvx` is unavailable but `openaca` is installed, use the same command

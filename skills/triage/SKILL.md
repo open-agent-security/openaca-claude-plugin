@@ -22,13 +22,13 @@ configuration and wants a security-oriented review.
    refs, insecure transport, missing remote auth) are most useful:
 
 ```bash
-uvx --prerelease allow --isolated --from openaca openaca scan endpoint -v --project . --include-posture
+uvx --isolated --from openaca openaca scan endpoint -v --project . --include-posture
 ```
 
 3. If the user only wants inventory, generate a BOM instead:
 
 ```bash
-uvx --prerelease allow --isolated --from openaca openaca bom endpoint --project . --output openaca-agent-bom.json
+uvx --isolated --from openaca openaca bom endpoint --project . --output openaca-agent-bom.json
 ```
 
 4. Summarize new or relevant components:
