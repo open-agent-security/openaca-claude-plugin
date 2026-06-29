@@ -61,7 +61,7 @@ OpenACA V1 plugin behavior is explicit-invocation only. It does not:
 - run background monitors,
 - block tool usage,
 - modify Claude Code settings automatically,
-- upload local configuration to OpenACA services.
+- automatically upload local configuration to OpenACA services.
 
 The underlying `openaca` CLI may query configured public vulnerability
 federation sources such as OSV.dev as part of normal scanning.
