@@ -17,25 +17,36 @@ configuration and wants a security-oriented review.
 
 1. Identify the changed scope: endpoint config, project config, repo
    files, or a stored Agent BOM.
-2. Run the narrowest useful scan. Include posture findings — triage
-   is exactly where configuration-hygiene issues (mutable install
-   refs, insecure transport, missing remote auth) are most useful:
+2. If the user only needs to see what changed, generate a fresh BOM and,
+   when a previous BOM exists and the installed CLI supports it, compare
+   the snapshots:
+
+```bash
+uvx --isolated --from openaca openaca bom endpoint --project . --output openaca-agent-bom.json
+uvx --isolated --from openaca openaca bom diff --before openaca-agent-bom.previous.json --after openaca-agent-bom.json
+```
+
+3. Run the narrowest useful scan when the user wants advisory or posture
+   evidence. Include posture findings — triage is exactly where
+   configuration-hygiene issues (mutable install refs, insecure transport,
+   missing remote auth) are most useful:
 
 ```bash
 uvx --isolated --from openaca openaca scan endpoint -v --project . --include-posture
 ```
 
-3. If the user only wants inventory, generate a BOM instead:
+4. If the user only wants inventory and has no previous BOM, generate a
+   BOM instead:
 
 ```bash
 uvx --isolated --from openaca openaca bom endpoint --project . --output openaca-agent-bom.json
 ```
 
-4. Summarize new or relevant components:
+5. Summarize new or relevant components:
    plugins, MCP servers, skills, hooks, commands, and direct components.
-5. Separate evidence classes:
+6. Separate evidence classes:
    advisory matches, posture findings, and composition inventory.
-6. Recommend next steps only where evidence supports them.
+7. Recommend next steps only where evidence supports them.
 
 If `uvx` is unavailable but `openaca` is installed, use the same command
 without the `uvx` prefix.

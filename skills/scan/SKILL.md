@@ -13,6 +13,10 @@ Use this skill when the user asks to run OpenACA, scan the current
 Claude Code endpoint, scan a repository, check MCP servers, inspect
 installed plugins or skills, or review agent supply-chain exposure.
 
+If the user only asks what is installed or what changed, prefer
+`/openaca:inventory` first. Use this scan workflow when they want
+advisory matches, posture findings, or a deeper review.
+
 ## Choose The Scan Target
 
 `--include-posture` is included by default in the commands below so
@@ -42,6 +46,13 @@ uvx --isolated --from openaca openaca scan repo --target /path/to/repo -v --incl
 
 If `uvx` is unavailable but `openaca` is installed, use the same command
 without the `uvx` prefix.
+
+Optional external scanners must remain explicit. Do not add `--scanner`
+unless the user asks for that scanner by name. For example:
+
+```bash
+uvx --isolated --from openaca openaca scan endpoint -v --include-posture --scanner nvidia-skillspector
+```
 
 ## Reporting
 

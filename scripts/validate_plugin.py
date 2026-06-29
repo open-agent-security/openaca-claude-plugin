@@ -42,7 +42,7 @@ def main() -> int:
         fail(".claude-plugin/marketplace.json name must be openaca")
 
     skills_dir = ROOT / "skills"
-    expected_skills = {"scan", "bom", "explain", "triage"}
+    expected_skills = {"inventory", "scan", "bom", "explain", "triage", "sync"}
     observed_skills = {
         child.name
         for child in skills_dir.iterdir()
