@@ -24,8 +24,8 @@ surface is:
 
 - `.claude-plugin/plugin.json` + `marketplace.json` — manifest +
   marketplace listing.
-- `skills/{scan,bom,explain,triage}/SKILL.md` — the four namespaced
-  commands users invoke (`/openaca:scan` etc.).
+- `skills/{inventory,scan,bom,explain,triage,sync}/SKILL.md` — the six
+  namespaced commands users invoke (`/openaca:inventory` etc.).
 - `scripts/validate_plugin.py` — local scaffold validator (also
   invoked by the pre-push hook and CI).
 
@@ -33,11 +33,16 @@ V1 is explicit-invocation only: no ambient hooks, no background
 monitors, no `.mcp.json`, no `bin/`. `validate_plugin.py` enforces
 that by failing if any of those paths appear.
 
+The plugin is the preferred developer install path for Claude Code users.
+Keep it thin over the published OpenACA CLI: plugin skills may guide users
+to CLI primitives such as `bom endpoint`, `bom diff`, `scan endpoint`, and
+`remote sync endpoint`, but must not embed scanner, diff, or upload logic.
+
 ## Repo conventions
 
 - Skills follow Claude Code's `skills/<name>/SKILL.md` layout.
-  Adding a new skill means updating `expected_skills` in
-  `scripts/validate_plugin.py`.
+  Adding or removing a skill means updating `expected_skills` in
+  `scripts/validate_plugin.py` and the README command list.
 - All JSON in `.claude-plugin/` and `skills/` must parse — the
   pre-push hook and CI both run a syntax check.
 - The plugin must not auto-install hooks or modify Claude Code

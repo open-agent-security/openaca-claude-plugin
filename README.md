@@ -5,8 +5,11 @@ security. It helps Claude run the open `openaca` scanner, generate Agent
 BOMs, and explain findings for Claude Code plugins, skills, MCP servers,
 hooks, commands, and runtime components.
 
-This plugin is a thin wrapper around the published OpenACA CLI. It does
-not contain scanner logic, hooks, background monitors, or an MCP server.
+This plugin is the preferred developer install path for local OpenACA
+workflows in Claude Code. It is a thin wrapper around the published
+OpenACA CLI and does not contain scanner logic, hooks, background
+monitors, or an MCP server. MDM or other managed deployment remains the
+right path when an organization needs mandatory coverage across a fleet.
 
 ## Install
 
@@ -21,10 +24,12 @@ During early testing, install directly from this repository:
 The skills are then available as namespaced Claude Code commands:
 
 ```text
+/openaca:inventory
 /openaca:scan
 /openaca:bom
 /openaca:explain
 /openaca:triage
+/openaca:sync
 ```
 
 ## Requirements
@@ -32,16 +37,21 @@ The skills are then available as namespaced Claude Code commands:
 - Claude Code with plugin support.
 - `uvx` available on PATH, or the `openaca` CLI already installed.
 
-The plugin examples use `uvx --from openaca` so the latest published
-OpenACA runs on demand without managing a separate installation.
+The plugin examples use `uvx --isolated --from openaca` so the latest
+published OpenACA runs on demand without managing a separate installation.
 
 ## What The Plugin Provides
 
-- `/openaca:scan`: run an OpenACA endpoint or repository scan.
+- `/openaca:inventory`: generate a fast local Agent BOM inventory without
+  advisory lookups.
+- `/openaca:scan`: run a deeper OpenACA endpoint or repository scan for
+  advisory and posture findings.
 - `/openaca:bom`: generate an Agent BOM for the current endpoint or repo.
 - `/openaca:explain`: explain OpenACA findings and next steps.
 - `/openaca:triage`: guide a focused review after agent configuration
   changes.
+- `/openaca:sync`: configure, check, or explicitly upload endpoint state
+  to OpenACA Cloud.
 
 ## Safety Model
 
@@ -55,6 +65,8 @@ OpenACA V1 plugin behavior is explicit-invocation only. It does not:
 
 The underlying `openaca` CLI may query configured public vulnerability
 federation sources such as OSV.dev as part of normal scanning.
+`/openaca:inventory` and `openaca bom diff` are local inventory/change
+workflows; `/openaca:sync` is the explicit Cloud upload boundary.
 
 ## Development
 
