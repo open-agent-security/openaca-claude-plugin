@@ -8,6 +8,8 @@
     {
       "name": "openaca",
       "description": "Scan your Claude Code setup for vulnerable or malicious agent components. Inventories MCP servers, plugins, skills, and hooks, matches them against OpenACA's OSV-compatible advisory corpus plus configuration-hygiene posture rules, generates an Agent BOM, and triages results into ranked exposure reports.",
+      "category": "security",
+      "homepage": "https://openaca.dev",
       "source": {
         "source": "github",
         "repo": "open-agent-security/openaca-claude-plugin",
