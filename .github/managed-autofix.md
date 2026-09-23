@@ -12,7 +12,7 @@ per-head Codex review marker.
 | --- | --- |
 | Routine | [trig_01FXbDMo9PZorcNSXW9qaKPS](https://claude.ai/code/routines/trig_01FXbDMo9PZorcNSXW9qaKPS), Anthropic-hosted Default environment (`env_01F2vbHGYXjLs9PV3hzvbvCX`), claude-sonnet-5, sole source this repository, no connectors |
 | Triggers | GitHub `pull_request.opened` and `pull_request.ready_for_review` (ids `f1c695a5-4238-4bdd-8640-5fa7bcf91a7b` opened, `6451ecb3-bd0f-467d-a616-d095312fff2f` ready_for_review, created 2026-09-23T06:40Z); a draft PR enrolls when marked ready. Automatic enrollment: not yet observed; verify on the first qualifying PR by reading its run log for the github-trigger-context block and a successful subscribe_pr_activity |
-| Prompt source | SHA-256 of the fenced block below: `22ddd689cab3fc629c845723e6f90853ffe181522c43fdfc0d74f7d804bd4fe9`; saved on the routine at creation, 2026-09-23T06:39:27Z, read back byte-identical |
+| Prompt source | SHA-256 of the fenced block below: `fcf5b7939591529bf21aa89685d00164af34379c7a67340499d7fbb6dcff7f4c`; saved on the routine 2026-09-23 (neutral review-request marker), read back byte-identical |
 | Codex review | unverified for this repository; confirm all-PRs/every-push in the Codex console. The prompt's explicit request is the fallback |
 | Legacy Actions loop | `claude.yml` and `autofix.yml` disabled 2026-09-22 (files remain); `bump-marketplace-sha.yml` is unrelated and stays |
 
@@ -60,7 +60,7 @@ At enrollment and after every push, ensure the current head has one Codex
 review queued, running, or completed. Accept an existing request marker only
 when its real author is this session's GitHub identity or a trusted maintainer.
 If neither a review nor a trusted marker exists, post one `@codex review`
-request with <!-- stacktrace-codex-review:FULL_HEAD_SHA -->. Do not duplicate a
+request with <!-- managed-codex-review:FULL_HEAD_SHA -->. Do not duplicate a
 trusted request for the same SHA or use a bot @-mention in other prose.
 
 Use GitHub activity and this session's history to avoid handling the same
