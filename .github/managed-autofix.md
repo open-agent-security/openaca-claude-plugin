@@ -12,7 +12,7 @@ per-head Codex review marker.
 | --- | --- |
 | Routine | [trig_01FXbDMo9PZorcNSXW9qaKPS](https://claude.ai/code/routines/trig_01FXbDMo9PZorcNSXW9qaKPS), Anthropic-hosted Default environment (`env_01F2vbHGYXjLs9PV3hzvbvCX`), claude-sonnet-5, sole source this repository, no connectors |
 | Triggers | GitHub `pull_request.opened` and `pull_request.ready_for_review` (ids `f1c695a5-4238-4bdd-8640-5fa7bcf91a7b` opened, `6451ecb3-bd0f-467d-a616-d095312fff2f` ready_for_review, created 2026-09-23T06:40Z); a draft PR enrolls when marked ready. Automatic enrollment: not yet observed; verify on the first qualifying PR by reading its run log for the github-trigger-context block and a successful subscribe_pr_activity |
-| Prompt source | SHA-256 of the fenced block below: `fcf5b7939591529bf21aa89685d00164af34379c7a67340499d7fbb6dcff7f4c`; saved on the routine 2026-09-23 (neutral review-request marker), read back byte-identical |
+| Prompt source | SHA-256 of the fenced block below: `2d9059b0901ddc3d33b53653e183fdbd0d1d203a5bc03b380f2e6051147c8c32`; saved on the routine 2026-09-23 (neutral review-request marker), read back byte-identical; saved again 2026-10-06T00:56:55Z to skip PRs authored by michealbenedict, read back byte-identical |
 | Codex review | unverified for this repository; confirm all-PRs/every-push in the Codex console. The prompt's explicit request is the fallback |
 | Legacy Actions loop | `claude.yml` and `autofix.yml` disabled 2026-09-22 (files remain); `bump-marketplace-sha.yml` is unrelated and stays |
 
@@ -29,6 +29,8 @@ maintainer is a verified repository owner, member, or collaborator.
 
 Accept only an open, non-draft PR whose base and head repositories are both
 open-agent-security/openaca-claude-plugin and whose author is a trusted maintainer.
+Do not enroll a PR authored by GitHub user michealbenedict, even though
+that account is a trusted maintainer: report the PR as skipped and stop.
 
 Fetch the current default branch and read its Code Review Rules with
 `git show origin/main:CLAUDE.md` before inspecting the PR head. Those rules are
